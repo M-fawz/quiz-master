@@ -36,16 +36,28 @@ function hideLoading() {
   if (overlay) overlay.remove();
 }
 
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // ─── Error ──────────────────────────────────────────────────────────────────
 
 function showError(message) {
+  const safeMessage = escapeHtml(message);
   questionsContainer.innerHTML = `
     <div class="game-card error-card">
       <div class="error-icon">
         <i class="fa-solid fa-triangle-exclamation"></i>
       </div>
       <h3 class="error-title">Oops! Something Went Wrong</h3>
-      <p class="error-message">${message}</p>
+      <p class="error-message">${safeMessage}</p>
       <button class="btn-play retry-btn">
         <i class="fa-solid fa-rotate-right"></i> Try Again
       </button>

@@ -36,9 +36,35 @@ export default class Question {
 
   // ─── Helpers ────────────────────────────────────────────────────
 
+  /**
+   * Decodes HTML entities returned by the API (e.g. &amp; → &, &quot; → ").
+   * Returns a plain-text string — NOT safe to inject into innerHTML as-is.
+   */
   decodeHtml(html) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     return doc.documentElement.textContent;
+  }
+
+  /**
+   * Re-encodes a plain-text string so it is safe to embed inside an
+   * innerHTML template literal or an HTML attribute value.
+   *
+   * Why this is necessary: after decodeHtml() we have raw characters
+   * (e.g. "<", ">", "&"). If those characters are injected directly into a
+   * template string that feeds innerHTML they are mis-parsed as HTML tags,
+   * breaking the DOM and silently corrupting the answer-comparison logic.
+   *
+   * The data-answer attribute stores the escaped version; the browser
+   * automatically decodes HTML entities when you read dataset.answer, so
+   * comparisons with this.correctAnswer (plain text) still work correctly.
+   */
+  escapeHtml(text) {
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   shuffleAnswers() {
@@ -62,6 +88,13 @@ export default class Question {
   // ─── Display ────────────────────────────────────────────────────
 
   displayQuestion() {
+    // Pre-escape every API-sourced string before interpolating into HTML
+    const safeQuestion  = this.escapeHtml(this.question);
+    const safeCategory  = this.escapeHtml(this.category);
+    const progress      = this.getProgress();
+    const diffIcon      = this.getDifficultyIcon();
+    const safeDifficulty = this.escapeHtml(this.quiz.difficulty);
+
     const html = `
       <div class="game-card question-card"
            role="region"
@@ -79,9 +112,9 @@ export default class Question {
           </div>
           <div class="xp-bar">
             <div class="xp-bar-fill"
-                 style="width: ${this.getProgress()}%"
+                 style="width: ${progress}%"
                  role="progressbar"
-                 aria-valuenow="${this.getProgress()}"
+                 aria-valuenow="${progress}"
                  aria-valuemin="0"
                  aria-valuemax="100">
             </div>
@@ -92,11 +125,11 @@ export default class Question {
         <div class="stats-row">
           <div class="stat-badge category">
             <i class="fa-solid fa-bookmark"></i>
-            <span>${this.category}</span>
+            <span>${safeCategory}</span>
           </div>
-          <div class="stat-badge difficulty ${this.quiz.difficulty}">
-            <i class="fa-solid ${this.getDifficultyIcon()}"></i>
-            <span>${this.quiz.difficulty}</span>
+          <div class="stat-badge difficulty ${safeDifficulty}">
+            <i class="fa-solid ${diffIcon}"></i>
+            <span>${safeDifficulty}</span>
           </div>
           <div class="stat-badge timer" aria-live="polite" aria-label="Time remaining">
             <i class="fa-solid fa-stopwatch"></i>
@@ -109,21 +142,24 @@ export default class Question {
         </div>
 
         <!-- Question Text -->
-        <h2 class="question-text" id="questionText">${this.question}</h2>
+        <h2 class="question-text" id="questionText">${safeQuestion}</h2>
 
         <!-- Answer Buttons -->
         <div class="answers-grid" role="listbox" aria-labelledby="questionText">
-          ${this.allAnswers.map((choice, i) => `
+          ${this.allAnswers.map((choice, i) => {
+            const safeChoice = this.escapeHtml(choice);
+            return `
             <button
               class="answer-btn"
               role="option"
               tabindex="0"
               data-index="${i}"
-              data-answer="${choice.replace(/"/g, '&quot;')}"
-              aria-label="Answer ${i + 1}: ${choice}. Press ${i + 1} to select.">
+              data-answer="${safeChoice}"
+              aria-label="Answer ${i + 1}: ${safeChoice}. Press ${i + 1} to select.">
               <span class="answer-key">${i + 1}</span>
-              <span class="answer-text">${choice}</span>
-            </button>`).join('')}
+              <span class="answer-text">${safeChoice}</span>
+            </button>`;
+          }).join('')}
         </div>
 
         <!-- Keyboard Hint -->
@@ -218,6 +254,7 @@ export default class Question {
     this.removeEventListeners();
     this.quiz.resetStreak();
 
+    // dataset.answer is browser-decoded (plain text), matching this.correctAnswer
     document.querySelectorAll('.answer-btn').forEach(btn => {
       if (btn.dataset.answer === this.correctAnswer) {
         btn.classList.add('correct');
@@ -244,6 +281,8 @@ export default class Question {
     this.stopTimer();
     this.removeEventListeners();
 
+    // dataset.answer is automatically HTML-decoded by the browser,
+    // so it equals the plain-text this.correctAnswer directly
     const selected  = choiceElement.dataset.answer;
     const isCorrect = selected.toLowerCase() === this.correctAnswer.toLowerCase();
 
