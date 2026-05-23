@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuizMaster - The Ultimate Trivia Challenge</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="./images/favicon.png" />
+
+    <!-- Font Awesome 6.5.1 -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="./CSS/style.css" />
+  </head>
+
+  <body>
+    <main class="app-container">
+
+      <!-- FIXED HEADER -->
+      <header class="logo-container">
+        <h1 class="logo">
+          <i class="fa-solid fa-chess-queen"></i>
+          QuizMaster
+        </h1>
+        <span class="logo-tagline">Test Your Knowledge</span>
+      </header>
+
+      <!-- SETUP FORM -->
+      <form id="quizOptions" class="game-card quiz-setup" aria-label="Game configuration">
+
+        <!-- Group 1: Player Name -->
+        <div class="form-group">
+          <label class="form-label" for="playerName">
+            <i class="fa-solid fa-user"></i> Player Name
+          </label>
+          <input
+            type="text"
+            id="playerName"
+            class="form-control"
+            placeholder="Enter your name"
+            autocomplete="off"
+            maxlength="30"
+          />
+        </div>
+
+        <!-- Group 2: Category (custom dropdown) -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fa-solid fa-layer-group"></i> Select Arena
+          </label>
+          <div class="custom-select" id="categorySelect">
+            <div
+              class="custom-select-trigger"
+              tabindex="0"
+              role="combobox"
+              aria-expanded="false"
+              aria-haspopup="listbox"
+            >
+              <span class="custom-select-icon">
+                <i class="fa-solid fa-shuffle"></i>
+              </span>
+              <span class="custom-select-text">Random Category</span>
+              <i class="fa-solid fa-chevron-down custom-select-arrow"></i>
+            </div>
+            <div class="custom-select-options" role="listbox">
+              <div class="custom-select-option selected" data-value="" role="option">
+                <i class="fa-solid fa-shuffle"></i> Random Category
+              </div>
+              <div class="custom-select-option" data-value="9" role="option">
+                <i class="fa-solid fa-brain"></i> General Knowledge
+              </div>
+              <div class="custom-select-option" data-value="27" role="option">
+                <i class="fa-solid fa-paw"></i> Animals
+              </div>
+              <div class="custom-select-option" data-value="19" role="option">
+                <i class="fa-solid fa-calculator"></i> Mathematics
+              </div>
+              <div class="custom-select-option" data-value="18" role="option">
+                <i class="fa-solid fa-computer"></i> Computers
+              </div>
+              <div class="custom-select-option" data-value="22" role="option">
+                <i class="fa-solid fa-globe"></i> Geography
+              </div>
+              <div class="custom-select-option" data-value="21" role="option">
+                <i class="fa-solid fa-futbol"></i> Sports
+              </div>
+              <div class="custom-select-option" data-value="23" role="option">
+                <i class="fa-solid fa-landmark"></i> History
+              </div>
+              <div class="custom-select-option" data-value="17" role="option">
+                <i class="fa-solid fa-flask"></i> Science &amp; Nature
+              </div>
+              <div class="custom-select-option" data-value="11" role="option">
+                <i class="fa-solid fa-film"></i> Film
+              </div>
+              <div class="custom-select-option" data-value="12" role="option">
+                <i class="fa-solid fa-music"></i> Music
+              </div>
+              <div class="custom-select-option" data-value="14" role="option">
+                <i class="fa-solid fa-tv"></i> Television
+              </div>
+              <div class="custom-select-option" data-value="15" role="option">
+                <i class="fa-solid fa-gamepad"></i> Video Games
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="categoryMenu" value="" />
+        </div>
+
+        <!-- Group 3: Difficulty (custom dropdown) -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fa-solid fa-gauge-high"></i> Difficulty Level
+          </label>
+          <div class="custom-select" id="difficultySelect">
+            <div
+              class="custom-select-trigger"
+              tabindex="0"
+              role="combobox"
+              aria-expanded="false"
+              aria-haspopup="listbox"
+            >
+              <span class="custom-select-icon">
+                <i class="fa-solid fa-face-smile"></i>
+              </span>
+              <span class="custom-select-text">Easy Mode</span>
+              <i class="fa-solid fa-chevron-down custom-select-arrow"></i>
+            </div>
+            <div class="custom-select-options" role="listbox">
+              <div class="custom-select-option selected" data-value="easy" role="option">
+                <i class="fa-solid fa-face-smile"></i> Easy Mode
+              </div>
+              <div class="custom-select-option" data-value="medium" role="option">
+                <i class="fa-solid fa-face-meh"></i> Medium Mode
+              </div>
+              <div class="custom-select-option" data-value="hard" role="option">
+                <i class="fa-solid fa-skull"></i> Hard Mode
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="difficultyOptions" value="easy" />
+        </div>
+
+        <!-- Group 4: Number of Rounds -->
+        <div class="form-group">
+          <label class="form-label" for="questionsNumber">
+            <i class="fa-solid fa-bolt"></i> Number of Rounds
+          </label>
+          <div class="number-input-wrapper">
+            <input
+              type="number"
+              id="questionsNumber"
+              class="form-control"
+              placeholder="Enter 1-50 rounds"
+              min="1"
+              max="50"
+              value="10"
+            />
+            <div class="number-controls">
+              <button
+                type="button"
+                class="number-btn"
+                data-action="increment"
+                aria-label="Increase number of questions"
+              >
+                <i class="fa-solid fa-chevron-up"></i>
+              </button>
+              <button
+                type="button"
+                class="number-btn"
+                data-action="decrement"
+                aria-label="Decrease number of questions"
+              >
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+            </div>
+          </div>
+          <p class="form-hint">More rounds = More XP potential!</p>
+        </div>
+
+        <!-- Start Button -->
+        <button type="button" id="startQuiz" class="btn-play">
+          <i class="fa-solid fa-play"></i> Start Game
+        </button>
+
+      </form>
+
+      <!-- GAME AREA: dynamically filled by JavaScript -->
+      <div class="questions-container" role="region" aria-label="Game area"></div>
+
+    </main>
+
+    <!-- IMPORTANT: ui-controls.js must load BEFORE index.js -->
+    <script src="./js/ui-controls.js"></script>
+    <script type="module" src="./js/index.js"></script>
+  </body>
+</html>
